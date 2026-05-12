@@ -163,10 +163,17 @@
 
       const fileGrid = document.getElementById('fileGrid');
       const filterButtons = document.querySelectorAll('.filter-btn');
+      const searchInput = document.getElementById('search');
+      const searchButton = Array.from(document.querySelectorAll('button')).find(btn => btn.textContent.includes('Cari Sekarang'));
+      let currentFilter = 'all';
+      let currentSearch = '';
 
-      function renderFiles(filter = 'all') {
+      function renderFiles(filter = 'all', search = '') {
         fileGrid.innerHTML = files
-          .filter(file => filter === 'all' || file.category === filter)
+          .filter(file => 
+            (filter === 'all' || file.category === filter) &&
+            (search === '' || file.title.toLowerCase().includes(search.toLowerCase()))
+          )
           .map(file => `
             <article class="group overflow-hidden rounded-3xl border border-slate-800/90 bg-slate-900 shadow-xl shadow-slate-950/20 transition hover:-translate-y-1 hover:border-indigo-500/40">
               <div class="overflow-hidden">
@@ -193,10 +200,27 @@
       filterButtons.forEach(button => {
         button.addEventListener('click', () => {
           const selected = button.getAttribute('data-filter');
-          renderFiles(selected);
+          currentFilter = selected;
+          renderFiles(currentFilter, currentSearch);
           filterButtons.forEach(btn => btn.classList.remove('bg-indigo-500', 'text-white', 'border-indigo-500'));
           button.classList.add('bg-indigo-500', 'text-white', 'border-indigo-500');
         });
+      });
+
+      // Search functionality
+      function handleSearch() {
+        currentSearch = searchInput.value.trim();
+        renderFiles(currentFilter, currentSearch);
+      }
+
+      if (searchButton) {
+        searchButton.addEventListener('click', handleSearch);
+      }
+
+      searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          handleSearch();
+        }
       });
 
       renderFiles();
