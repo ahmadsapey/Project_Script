@@ -224,6 +224,7 @@
       function handleSearch() {
         currentSearch = searchInput.value.trim();
         renderFiles(currentFilter, currentSearch);
+        fileGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
 
       if (searchButton) {
