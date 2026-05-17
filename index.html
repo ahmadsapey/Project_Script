@@ -261,7 +261,7 @@
             (search === '' || file.title.toLowerCase().includes(search.toLowerCase()))
           )
           .map((file, index) => `
-            <article class="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-800/90 bg-slate-900 shadow-xl shadow-slate-950/20 transition hover:-translate-y-1 hover:border-indigo-500/40">
+            <article class="group flex h-full min-h-[28rem] flex-col overflow-hidden rounded-3xl border border-slate-800/90 bg-slate-900 shadow-xl shadow-slate-950/20 transition hover:-translate-y-1 hover:border-indigo-500/40">
               <div class="overflow-hidden">
                 <img src="${file.image}" alt="${file.title}" class="h-52 w-full object-cover transition duration-500 group-hover:scale-105" />
               </div>
