@@ -64,13 +64,13 @@
               <button data-filter="all" class="filter-btn rounded-full border border-slate-700 bg-slate-950 px-5 py-2 text-sm font-semibold text-slate-100 transition hover:border-indigo-400 hover:text-white">
                 Semua
               </button>
-              <button data-filter="Game Mod" class="filter-btn rounded-full border border-slate-700 bg-slate-950 px-5 py-2 text-sm font-semibold text-slate-100 transition hover:border-indigo-400 hover:text-white">
+              <button data-filter="Consol & Bios" class="filter-btn rounded-full border border-slate-700 bg-slate-950 px-5 py-2 text-sm font-semibold text-slate-100 transition hover:border-indigo-400 hover:text-white">
                 Consol & Bios
               </button>
-              <button data-filter="Game Mod" class="filter-btn rounded-full border border-slate-700 bg-slate-950 px-5 py-2 text-sm font-semibold text-slate-100 transition hover:border-indigo-400 hover:text-white">
+              <button data-filter="Game PS1" class="filter-btn rounded-full border border-slate-700 bg-slate-950 px-5 py-2 text-sm font-semibold text-slate-100 transition hover:border-indigo-400 hover:text-white">
                 Game PS1
               </button>
-              <button data-filter="Tools" class="filter-btn rounded-full border border-slate-700 bg-slate-950 px-5 py-2 text-sm font-semibold text-slate-100 transition hover:border-indigo-400 hover:text-white">
+              <button data-filter="Game PS2" class="filter-btn rounded-full border border-slate-700 bg-slate-950 px-5 py-2 text-sm font-semibold text-slate-100 transition hover:border-indigo-400 hover:text-white">
                 Game PS2
               </button>
             </div>
@@ -261,11 +261,11 @@
             (search === '' || file.title.toLowerCase().includes(search.toLowerCase()))
           )
           .map((file, index) => `
-            <article class="group overflow-hidden rounded-3xl border border-slate-800/90 bg-slate-900 shadow-xl shadow-slate-950/20 transition hover:-translate-y-1 hover:border-indigo-500/40">
+            <article class="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-800/90 bg-slate-900 shadow-xl shadow-slate-950/20 transition hover:-translate-y-1 hover:border-indigo-500/40">
               <div class="overflow-hidden">
                 <img src="${file.image}" alt="${file.title}" class="h-52 w-full object-cover transition duration-500 group-hover:scale-105" />
               </div>
-              <div class="space-y-4 p-6">
+              <div class="flex flex-1 flex-col space-y-4 p-6">
                 <div class="flex items-center justify-between gap-3">
                   <span class="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">
                     ${file.category}
@@ -275,7 +275,7 @@
                 <h3 class="text-xl font-semibold text-slate-100">${file.title}</h3>
                 <p class="text-sm leading-6 text-slate-400">${file.desc}</p>
                 
-                <button onclick="gaskeunDownload('${file.mediafire_url}')" class="inline-flex w-full items-center justify-center rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 cursor-pointer">
+                <button onclick="gaskeunDownload('${file.mediafire_url}')" class="mt-auto inline-flex w-full items-center justify-center rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 cursor-pointer">
                   Download File
                 </button>
               </div>
