@@ -228,9 +228,20 @@
         renderFiles(currentFilter, currentSearch);
       }
 
+      function scrollToResults() {
+        const results = document.getElementById('fileGrid');
+        if (!results) return;
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.getBoundingClientRect().height : 0;
+        const top = results.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+
       function handleSearch() {
         currentSearch = searchInput.value.trim();
         renderFiles(currentFilter, currentSearch);
+        // ensure DOM updated, then scroll to results (works on mobile too)
+        setTimeout(scrollToResults, 50);
       }
 
       files = loadFiles();
