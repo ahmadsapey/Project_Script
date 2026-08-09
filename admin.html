@@ -83,6 +83,7 @@
       const OLD_STORAGE_KEY = 'gaskeunfile_admin_cards';
       const SYNC_KEY = STORAGE_KEY + '_updated';
       const AUTH_KEY = 'gaskeunfile_is_logged_in';
+      const SERVER_SAVE_ENDPOINT = '/api/save-sheet';
       const form = document.getElementById('adminForm');
       const messageEl = document.getElementById('message');
       const previewEl = document.getElementById('adminPreview');
@@ -199,12 +200,30 @@
         submitButton.textContent = 'Simpan Konten dari JS';
       }
 
-      function saveAdminSheetData(data) {
+      async function saveAdminSheetData(data) {
+        // Simpan ke localStorage dulu untuk preview lokal
         setAdminFiles(data);
         syncStorage();
-        resetForm();
         renderPreview();
-        showMessage('Konten JS berhasil disimpan. Refresh landing page untuk melihat hasil.');
+
+        // Kirim data ke server untuk menulis data_sheet.js dan men-download gambar jika diperlukan
+        try {
+          const response = await fetch(SERVER_SAVE_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: data }),
+          });
+          const payload = await response.json();
+          if (!response.ok || payload.success !== true) {
+            showMessage(`Simpan server gagal: ${payload.error || response.statusText}`, false);
+            return;
+          }
+          showMessage('Konten tersimpan ke server dan gambar didownload. Refresh landing page untuk melihat hasil.');
+        } catch (error) {
+          showMessage(`Simpan server gagal: ${error.message}`, false);
+        }
+
+        resetForm();
       }
 
       function syncStorage() {

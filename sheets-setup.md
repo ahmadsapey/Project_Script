@@ -55,3 +55,9 @@ window.DATA_SHEET = [
 
 Letakkan file `data_sheet.js` di root publik situs (atau pastikan admin dapat meng-upload ke `/data_sheet.js`). Saat pengunjung membuka landing page, `index.html` akan mencoba memuat `data_sheet.js` terlebih dahulu dan menggunakan `window.DATA_SHEET` jika tersedia. Jika tidak ada, sistem akan mencoba Google Sheets, lalu `files.json`, lalu fallback ke `localStorage`.
 
+Catatan tambahan untuk project berbasis server:
+- Admin panel sekarang bisa mengirim data JS ke endpoint server `api/save-sheet.php`.
+- Server akan menulis ulang `/data_sheet.js` dan mendownload semua gambar remote yang valid ke folder `/Gambar/`.
+- Jadi link gambar Drive preview `https://drive.google.com/file/d/ID/view?...` akan dikonversi otomatis menjadi `https://drive.google.com/uc?export=view&id=ID`, lalu didownload ke server.
+- Pastikan project dijalankan melalui server (Laragon) agar endpoint PHP bekerja.
+
