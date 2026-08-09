@@ -18,17 +18,24 @@
     <header class="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/95 backdrop-blur">
       <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <div class="flex items-center gap-3">
-          <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-emerald-400 shadow-lg shadow-emerald-500/20"></div>
+          <img src="./Gambar/Logo Gaskenfile.png" alt="GaskeunFile Logo" class="h-10 w-10 rounded-2xl object-cover shadow-lg shadow-emerald-500/20" />
           <div>
             <p class="text-sm font-semibold tracking-[0.2em] text-slate-300">FILE SHARE</p>
             <p class="text-base font-bold text-white">GaskeunFile</p>
           </div>
         </div>
-        <a
-          href="#"
-          class="inline-flex items-center rounded-full bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition hover:bg-indigo-400"
-          >Join Telegram</a
-        >
+        <div class="flex items-center gap-3">
+          <a
+            href="admin.html"
+            class="inline-flex items-center rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-100 shadow-sm transition hover:border-indigo-400 hover:text-white"
+            >Admin Panel</a
+          >
+          <a
+            href="#"
+            class="inline-flex items-center rounded-full bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition hover:bg-indigo-400"
+            >Join Youtube</a
+          >
+        </div>
       </div>
     </header>
 
@@ -52,14 +59,15 @@
                   placeholder="Cari script, mod, atau tools..."
                   class="w-full rounded-2xl border border-slate-700 bg-slate-950 px-5 py-4 text-slate-100 placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                 />
-                <button class="inline-flex items-center justify-center rounded-2xl bg-emerald-500 px-6 py-4 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400">
-                  Cari Sekarang
-                </button>
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <button class="inline-flex items-center justify-center rounded-2xl bg-emerald-500 px-6 py-4 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400">
+                    Cari Sekarang
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Adsterra top banner -->
           <div id="ad-top" class="rounded-3xl border border-slate-800/80 bg-slate-900/80 p-6 text-center text-slate-400">
             <!-- Adsterra Top Banner -->
           </div>
@@ -85,13 +93,18 @@
 
         <aside class="space-y-8">
           <div class="rounded-3xl border border-slate-800/90 bg-slate-900/90 p-6 shadow-xl shadow-slate-950/20">
-            <h2 class="text-xl font-semibold text-slate-100">Info Singkat</h2>
-            <p class="mt-3 text-slate-400">
-              Gunakan tombol filter dan pencarian untuk menemukan konten terbaru. Semua unduhan diarahkan ke Safelinku untuk keamanan dan kontrol link.
-            </p>
+            <h2 class="text-xl font-semibold text-slate-100">Tutorial Pemasangan ZArchiver</h2>
+            <ol class="mt-4 space-y-3 text-slate-400 list-decimal list-inside">
+              <li>Buka ZArchiver, lalu cari file script hasil download.</li>
+              <li>Tekan file script sekali, pilih <strong>Ekstrak</strong> atau <strong>Cut</strong> ke folder tujuan.</li>
+              <li>Ketik bagian paling atas di ZArchiver (tulisan Download), lalu pilih Memori Perangkat</li>
+              <li>
+                Masuk ke folder: Android -> data ->dragon2017 Nah simpan/ tempel disini.
+              </li>
+            </ol>
+            <p class="mt-4 text-slate-400">Langsung lo buka game nya dan lihat hasilnya.</p>
           </div>
 
-          <!-- Adsterra sidebar banner -->
           <div id="ad-sidebar" class="rounded-3xl border border-slate-800/80 bg-slate-900/80 p-6 text-center text-slate-400">
             <!-- Adsterra Sidebar Banner -->
           </div>
@@ -104,7 +117,7 @@
             <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Daftar File</p>
             <h2 class="text-3xl font-bold text-slate-100">Katalog Download</h2>
           </div>
-          <p class="text-sm text-slate-400">Diperbarui secara otomatis lewat data JavaScript.</p>
+          <p class="text-sm text-slate-400">Rek untuk skin yang lo mau, silahkan ke youtube kami.</p>
         </div>
 
         <div id="fileGrid" class="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3"></div>
@@ -128,7 +141,10 @@
     </footer>
 
     <script>
-      const files = [
+      const STORAGE_KEY = 'gaskeunfile_cards';
+      const OLD_STORAGE_KEY = 'gaskeunfile_admin_cards';
+
+      const defaultFiles = [
         {
           title: 'Script Skin GS KOF',
           category: 'Script Skin',
@@ -163,6 +179,42 @@
 
       const fileGrid = document.getElementById('fileGrid');
       const filterButtons = document.querySelectorAll('.filter-btn');
+      const searchInput = document.getElementById('search');
+      const searchButton = Array.from(document.querySelectorAll('button')).find(btn => btn.textContent.includes('Cari Sekarang'));
+      const refreshButton = document.getElementById('refreshButton');
+      let currentFilter = 'all';
+      let currentSearch = '';
+      let files = [];
+
+      function migrateStorage() {
+        const oldStored = localStorage.getItem(OLD_STORAGE_KEY);
+        const newStored = localStorage.getItem(STORAGE_KEY);
+        if (oldStored !== null && newStored === null) {
+          localStorage.setItem(STORAGE_KEY, oldStored);
+          localStorage.removeItem(OLD_STORAGE_KEY);
+        }
+      }
+
+      function loadFiles() {
+        migrateStorage();
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored === null) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultFiles));
+          return [...defaultFiles];
+        }
+        try {
+          return JSON.parse(stored) || [];
+        } catch (error) {
+          return [];
+        }
+      }
+
+      function refreshData() {
+        files = loadFiles();
+        renderFiles(currentFilter, currentSearch);
+      }
+
+      files = loadFiles();
 
       function renderFiles(filter = 'all') {
         fileGrid.innerHTML = files
@@ -193,10 +245,31 @@
       filterButtons.forEach(button => {
         button.addEventListener('click', () => {
           const selected = button.getAttribute('data-filter');
-          renderFiles(selected);
+          currentFilter = selected;
+          renderFiles(currentFilter, currentSearch);
           filterButtons.forEach(btn => btn.classList.remove('bg-indigo-500', 'text-white', 'border-indigo-500'));
           button.classList.add('bg-indigo-500', 'text-white', 'border-indigo-500');
         });
+      });
+
+      if (searchButton) {
+        searchButton.addEventListener('click', handleSearch);
+      }
+
+      searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          handleSearch();
+        }
+      });
+
+      if (refreshButton) {
+        refreshButton.addEventListener('click', refreshData);
+      }
+
+      window.addEventListener('storage', (event) => {
+        if (event.key === STORAGE_KEY) {
+          refreshData();
+        }
       });
 
       renderFiles();
