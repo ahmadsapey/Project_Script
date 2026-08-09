@@ -128,16 +128,28 @@
         }
       }
 
+      function normalizeDriveImageUrl(url) {
+        if (!url || typeof url !== 'string') return url;
+        const driveMatch = url.match(/(?:drive\.google\.com\/file\/d\/|drive\.google\.com\/open\?id=|drive\.google\.com\/uc\?id=|docs\.google\.com\/uc\?id=)([a-zA-Z0-9_-]+)/);
+        if (driveMatch) {
+          return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+        }
+        return url;
+      }
+
       function getImageUrl(image) {
         const fallback = 'https://via.placeholder.com/800x520/0f172a/ffffff?text=No+Image';
         if (!image) return fallback;
-        if (typeof image === 'string' && image.trim()) return image;
+        let url = null;
+        if (typeof image === 'string' && image.trim()) url = image.trim();
         if (typeof image === 'object') {
-          if (typeof image.url === 'string' && image.url.trim()) return image.url;
-          if (typeof image.src === 'string' && image.src.trim()) return image.src;
-          if (Array.isArray(image) && image.length && typeof image[0] === 'string') return image[0];
+          if (typeof image.url === 'string' && image.url.trim()) url = image.url.trim();
+          else if (typeof image.src === 'string' && image.src.trim()) url = image.src.trim();
+          else if (Array.isArray(image) && image.length && typeof image[0] === 'string') url = image[0].trim();
         }
-        return fallback;
+        if (!url) return fallback;
+        url = normalizeDriveImageUrl(url);
+        return url;
       }
 
       function renderPreview() {
@@ -150,7 +162,7 @@
         previewEl.innerHTML = files
           .map((file) => `
             <article class="overflow-hidden rounded-3xl border border-slate-800/90 bg-slate-900 shadow-xl shadow-slate-950/20">
-              <img src="${getImageUrl(file.image)}" alt="${file.title}" class="h-48 w-full object-cover" />
+              <img src="${getImageUrl(file.image)}" alt="${file.title}" referrerpolicy="no-referrer" crossorigin="anonymous" class="h-48 w-full object-cover" />
               <div class="space-y-4 p-6">
                 <div class="flex items-center justify-between gap-3">
                   <span class="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">${file.category}</span>
