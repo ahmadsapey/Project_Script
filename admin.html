@@ -47,7 +47,7 @@
             </label>
             <label class="block">
               <span class="text-sm font-semibold text-slate-200">Link Script</span>
-              <input id="link" type="url" placeholder="https://sfl.gl/xxxxx" class="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" required />
+              <input id="link" type="text" placeholder="https://sfl.gl/xxxxx atau smartlink" class="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" required />
             </label>
           </div>
 
@@ -102,6 +102,7 @@
     <script>
       const STORAGE_KEY = 'gaskeunfile_cards';
       const OLD_STORAGE_KEY = 'gaskeunfile_admin_cards';
+      const SYNC_KEY = STORAGE_KEY + '_updated';
       const AUTH_KEY = 'gaskeunfile_is_logged_in';
       const form = document.getElementById('adminForm');
       const messageEl = document.getElementById('message');
@@ -205,6 +206,10 @@
         }
       }
 
+      function syncStorage() {
+        localStorage.setItem(SYNC_KEY, Date.now().toString());
+      }
+
       function saveItem(imageData, title, category, link, editIndex) {
         const files = getAdminFiles();
         const item = { title, category, image: imageData, safelinku_url: link };
@@ -218,6 +223,7 @@
         }
 
         setAdminFiles(files);
+        syncStorage();
         resetForm();
         renderPreview();
       }
@@ -273,6 +279,7 @@
           if (!confirm(`Hapus konten "${files[index].title}"?`)) return;
           files.splice(index, 1);
           setAdminFiles(files);
+          syncStorage();
           renderPreview();
           showMessage('Konten berhasil dihapus. Refresh landing page untuk melihat perubahan.');
         }
@@ -283,6 +290,7 @@
           return;
         }
         setAdminFiles([]);
+        syncStorage();
         resetForm();
         renderPreview();
         showMessage('Semua konten admin berhasil dihapus.');

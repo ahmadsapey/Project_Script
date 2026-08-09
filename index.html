@@ -26,7 +26,7 @@
         </div>
         <div class="flex items-center gap-3">
           <a
-            href="#"
+            href="https://www.youtube.com/channel/UCYn_GMRGNEWl70rFbOxZJ6g"
             class="inline-flex items-center rounded-full bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition hover:bg-indigo-400"
             >Join Youtube</a
           >
@@ -83,39 +83,39 @@
                 Tools
               </button>
             </div>
-            <p class="mt-4 text-sm text-slate-400">Pilih kategori untuk menampilkan file sesuai kebutuhan. Dibangun dengan kontrol dinamis untuk kemudahan pemeliharaan.</p>
+            <p class="mt-4 text-sm text-slate-400">Pilih kategori untuk menampilkan file sesuai kebutuhan. Jika masih muncul iklan kembali ke halaman lalu klik lagi downloadnya.</p>
           </div>
         </div>
 
         <aside class="space-y-8">
           <div class="rounded-3xl border border-slate-800/90 bg-slate-900/90 p-6 shadow-xl shadow-slate-950/20">
-            <h2 class="text-xl font-semibold text-slate-100">Tutorial Pemasangan ZArchiver</h2>
+            <h2 class="text-xl font-semibold text-slate-100">Tutorial Pemasangan di ZArchiver</h2>
             <ol class="mt-4 space-y-3 text-slate-400 list-decimal list-inside">
               <li>Buka ZArchiver, lalu cari file script hasil download.</li>
               <li>Tekan file script sekali, pilih <strong>Ekstrak</strong> atau <strong>Cut</strong> ke folder tujuan.</li>
               <li>Ketik bagian paling atas di ZArchiver (tulisan Download), lalu pilih Memori Perangkat</li>
               <li>
-                Masuk ke folder: Android -> data ->dragon2017 Nah simpan/ tempel disini.
+                Masuk ke folder: Android -> data ->dragon2017 -> assets Nah simpan/ tempel disini.
               </li>
             </ol>
             <p class="mt-4 text-slate-400">Langsung lo buka game nya dan lihat hasilnya.</p>
           </div>
 
-          <div id="ad-sidebar" class="rounded-3xl border border-slate-800/80 bg-slate-900/80 p-6 text-center text-slate-400">
-            <!-- Tempel kode Adsterra 300x250 Banner atau Social Bar di dalam div ini -->
-            <script src="https://pl30766541.effectivecpmnetwork.com/11/b2/03/11b203117c9616eec95ac5cb8578df51.js"></script>
-            <script>
-        atOptions = {
-          'key' : '767d4d1f542d98f2bc83d4441650e3fc',
-          'format' : 'iframe',
-          'height' : 250,
-          'width' : 300,
-          'params' : {}
-        };
-      </script>
-    <script src="https://www.highperformanceformat.com/767d4d1f542d98f2bc83d4441650e3fc/invoke.js"></script>
-
-            
+          <div id="ad-sidebar" class="rounded-3xl border border-slate-800/80 bg-slate-900/80 p-6 text-slate-400">
+            <div class="flex justify-center">
+              <!-- Tempel kode Adsterra 300x250 Banner atau Social Bar di dalam div ini -->
+              <script src="https://pl30766541.effectivecpmnetwork.com/11/b2/03/11b203117c9616eec95ac5cb8578df51.js"></script>
+              <script>
+          atOptions = {
+            'key' : '767d4d1f542d98f2bc83d4441650e3fc',
+            'format' : 'iframe',
+            'height' : 250,
+            'width' : 300,
+            'params' : {}
+          };
+        </script>
+      <script src="https://www.highperformanceformat.com/767d4d1f542d98f2bc83d4441650e3fc/invoke.js"></script>
+            </div>
           </div>
         </aside>
       </section>
@@ -156,6 +156,7 @@
     <script>
       const STORAGE_KEY = 'gaskeunfile_cards';
       const OLD_STORAGE_KEY = 'gaskeunfile_admin_cards';
+      const SYNC_KEY = STORAGE_KEY + '_updated';
 
       const defaultFiles = [
         {
@@ -227,11 +228,23 @@
         renderFiles(currentFilter, currentSearch);
       }
 
+      function handleSearch() {
+        currentSearch = searchInput.value.trim();
+        renderFiles(currentFilter, currentSearch);
+      }
+
       files = loadFiles();
 
-      function renderFiles(filter = 'all') {
-        fileGrid.innerHTML = files
+      function renderFiles(filter = 'all', search = '') {
+        const filtered = files
           .filter(file => filter === 'all' || file.category === filter)
+          .filter(file => {
+            if (!search) return true;
+            const query = search.toLowerCase();
+            return file.title.toLowerCase().includes(query) || file.category.toLowerCase().includes(query);
+          });
+
+        fileGrid.innerHTML = filtered
           .map(file => `
             <article class="group overflow-hidden rounded-3xl border border-slate-800/90 bg-slate-900 shadow-xl shadow-slate-950/20 transition hover:-translate-y-1 hover:border-indigo-500/40">
               <div class="overflow-hidden">
@@ -280,7 +293,7 @@
       }
 
       window.addEventListener('storage', (event) => {
-        if (event.key === STORAGE_KEY) {
+        if (event.key === STORAGE_KEY || event.key === SYNC_KEY) {
           refreshData();
         }
       });
