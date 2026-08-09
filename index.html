@@ -63,7 +63,7 @@
             </div>
           </div>
 
-          <div id="ad-top" class="rounded-3xl border border-slate-800/80 bg-slate-900/80 p-6 text-center text-slate-400">
+          <div>
             <!-- Tempel kode Adsterra Smartlink atau Popunder di dalam div ini -->
             <script src="https://pl30766538.effectivecpmnetwork.com/be/a9/64/bea9643bf2c8bb7c8fb4195237eef7b0.js"></script>
           </div>
@@ -309,7 +309,27 @@
         }
       });
 
-      renderFiles();
+      // Try to load canonical data from `files.json` so different devices see the same content.
+      async function initFiles() {
+        try {
+          const resp = await fetch('api/files.php', { cache: 'no-store' });
+          if (!resp.ok) throw new Error('no remote file');
+          const remote = await resp.json();
+          if (Array.isArray(remote) && remote.length) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(remote));
+            files = remote;
+            renderFiles(currentFilter, currentSearch);
+            return;
+          }
+        } catch (e) {
+          // fall back to local storage / defaults
+        }
+        // fallback if fetch failed or returned invalid data
+        files = loadFiles();
+        renderFiles(currentFilter, currentSearch);
+      }
+
+      initFiles();
     </script>
   </body>
 </html>
