@@ -163,32 +163,26 @@
         {
           title: 'Script Skin Chou KOF',
           category: 'Script Skin',
-          image: './Gambar/chou kof.png',
+          image: './Gambar/chou_kof.png',
           safelinku_url: 'https://www.mediafire.com/file/3iji0y3rcw7cju5/Default_Chou_KOF.zip/file'
         },
         {
-          title: 'Script Skin Chou KOF',
-          category: 'Script Skin',
-          image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80',
-          safelinku_url: 'https://sfl.gl/mDqWe'
-        },
-        {
           title: 'Tool Composer-Setup',
-          category: 'Tools',
-          image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80',
-          safelinku_url: 'https://sfl.gl/Uprlb'
+          category: 'Script Skin',
+          image: './Gambar/haya_kakasih.png',
+          safelinku_url: 'https://www.mediafire.com/file/j5w121jy0l7cigx/Default_Hayabusa_Kakashi.zip/file'
         },
         {
           title: 'Script Skin Hayabusa Kakasih',
           category: 'Script Skin',
-          image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80',
-          safelinku_url: 'https://sfl.gl/W1B1CW'
+          image: './Gambar/prangko_legend.png',
+          safelinku_url: 'https://www.mediafire.com/file/p8lu776r5ngmczp/Default_Franco_Legend.zip/file'
         },
         {
           title: 'Tools putty-64bit-0.83',
-          category: 'Tools',
-          image: 'https://images.unsplash.com/photo-1535223289827-42f1e9919769?auto=format&fit=crop&w=800&q=80',
-          safelinku_url: 'https://sfl.gl/S0dMO'
+          category: 'Script Skin',
+          image: 'yss_collector.png',
+          safelinku_url: 'https://www.mediafire.com/file/w19yh2msywzodd7/Default_YSS_Collector.zip/file'
         }
       ];
 
@@ -212,16 +206,9 @@
 
       function loadFiles() {
         migrateStorage();
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored === null) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultFiles));
-          return [...defaultFiles];
-        }
-        try {
-          return JSON.parse(stored) || [];
-        } catch (error) {
-          return [];
-        }
+        const fallbackFiles = [...defaultFiles];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(fallbackFiles));
+        return fallbackFiles;
       }
 
       function refreshData() {
