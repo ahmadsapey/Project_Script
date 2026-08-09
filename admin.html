@@ -130,11 +130,22 @@
 
       function normalizeDriveImageUrl(url) {
         if (!url || typeof url !== 'string') return url;
-        const driveMatch = url.match(/(?:drive\.google\.com\/file\/d\/|drive\.google\.com\/open\?id=|drive\.google\.com\/uc\?id=|docs\.google\.com\/uc\?id=)([a-zA-Z0-9_-]+)/);
+        const cleaned = url.trim();
+        const driveMatch = cleaned.match(/(?:drive\.google\.com\/file\/d\/|drive\.google\.com\/open\?id=|drive\.google\.com\/uc\?id=|docs\.google\.com\/uc\?id=)([a-zA-Z0-9_-]+)/);
         if (driveMatch) {
           return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
         }
-        return url;
+        return cleaned;
+      }
+
+      function normalizeDataSheet(data) {
+        if (!Array.isArray(data)) return data;
+        return data.map(item => {
+          if (item && typeof item === 'object' && item.image) {
+            return { ...item, image: normalizeDriveImageUrl(item.image) };
+          }
+          return item;
+        });
       }
 
       function getImageUrl(image) {
@@ -206,7 +217,7 @@
           showMessage('File JS tidak valid. Pastikan ada `window.DATA_SHEET = [...]` di dalamnya.', false);
           return;
         }
-        saveAdminSheetData(parsed);
+        saveAdminSheetData(normalizeDataSheet(parsed));
       }
 
       function readFileContent(file) {
