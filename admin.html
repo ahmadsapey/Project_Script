@@ -40,42 +40,21 @@
         <p class="mt-3 text-slate-400">Tambah card baru langsung ke halaman utama tanpa menggunakan database. Data disimpan otomatis di browser.</p>
 
         <form id="adminForm" class="mt-8 space-y-6">
-          <div class="grid gap-6 md:grid-cols-2">
+          <div class="space-y-6">
             <label class="block">
-              <span class="text-sm font-semibold text-slate-200">Nama Script</span>
-              <input id="title" type="text" placeholder="Contoh: Script Skin Hayabusa" class="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" required />
+              <span class="text-sm font-semibold text-slate-200">Upload File JS dari Sheets</span>
+              <input id="jsFile" type="file" accept=".js" class="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none file:mr-4 file:rounded-full file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white" />
+              <p class="mt-2 text-xs text-slate-500">Unggah file JS hasil export dari Google Sheets. Sistem akan memuat konten otomatis ke landing page.</p>
             </label>
             <label class="block">
-              <span class="text-sm font-semibold text-slate-200">Link Script</span>
-              <input id="link" type="text" placeholder="https://sfl.gl/xxxxx atau smartlink" class="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" required />
-            </label>
-          </div>
-
-          <div class="grid gap-6 md:grid-cols-2">
-            <label class="block">
-              <span class="text-sm font-semibold text-slate-200">Upload Gambar</span>
-              <input id="imageFile" type="file" accept="image/*" class="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none file:mr-4 file:rounded-full file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white" />
-              <p class="mt-2 text-xs text-slate-500">Unggah file gambar langsung. Kosongkan saat edit jika tidak ingin mengganti gambar.</p>
-              <img id="imagePreview" class="mt-3 hidden h-40 w-full rounded-2xl object-cover border border-slate-700" alt="Preview Gambar" />
-            </label>
-            <label class="block">
-              <span class="text-sm font-semibold text-slate-200">Kategori</span>
-              <select id="category" class="mt-2 w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
-                <option value="Script Skin">Script Skin</option>
-                <option value="Game Mod">Game Mod</option>
-                <option value="Tools">Tools</option>
-              </select>
+              <span class="text-sm font-semibold text-slate-200">Atau Tempel Isi JS</span>
+              <textarea id="jsContent" rows="8" placeholder="window.DATA_SHEET = [ ... ]" class="mt-2 w-full rounded-3xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"></textarea>
             </label>
           </div>
-
-          <input type="hidden" id="editIndex" value="" />
 
           <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
             <button id="submitButton" type="submit" class="inline-flex items-center justify-center rounded-2xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400">
-              Tambah Konten
-            </button>
-            <button id="cancelEdit" type="button" class="inline-flex items-center justify-center rounded-2xl border border-slate-700 bg-slate-950 px-6 py-3 text-sm font-semibold text-slate-100 transition hover:border-slate-400 hover:text-white hidden">
-              Batalkan Edit
+              Simpan Konten dari JS
             </button>
             <button id="resetButton" type="button" class="inline-flex items-center justify-center rounded-2xl border border-slate-700 bg-slate-950 px-6 py-3 text-sm font-semibold text-slate-100 transition hover:border-red-400 hover:text-red-300">
               Hapus Semua Konten Admin
@@ -107,13 +86,11 @@
       const form = document.getElementById('adminForm');
       const messageEl = document.getElementById('message');
       const previewEl = document.getElementById('adminPreview');
-      const resetButton = document.getElementById('resetButton');
       const logoutButton = document.getElementById('logoutButton');
-      const imageInput = document.getElementById('imageFile');
-      const imagePreview = document.getElementById('imagePreview');
+      const jsFileInput = document.getElementById('jsFile');
+      const jsContentInput = document.getElementById('jsContent');
       const submitButton = document.getElementById('submitButton');
-      const cancelEditButton = document.getElementById('cancelEdit');
-      const editIndexInput = document.getElementById('editIndex');
+      const resetButton = document.getElementById('resetButton');
 
       if (localStorage.getItem(AUTH_KEY) !== 'true') {
         window.location.href = 'login.html';
@@ -141,24 +118,25 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(files));
       }
 
-      function readImageFile(file) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = () => reject(new Error('Gagal membaca file gambar.'));
-          reader.readAsDataURL(file);
-        });
+      function parseUploadedJS(content) {
+        try {
+          const match = content.match(/window\.DATA_SHEET\s*=\s*(\[.*\]);?/s);
+          if (!match) return null;
+          return JSON.parse(match[1]);
+        } catch (error) {
+          return null;
+        }
       }
 
       function renderPreview() {
         const files = getAdminFiles();
         if (files.length === 0) {
-          previewEl.innerHTML = '<p class="text-slate-400">Belum ada konten admin. Tambahkan script baru untuk melihat preview.</p>';
+          previewEl.innerHTML = '<p class="text-slate-400">Belum ada konten admin. Upload file JS hasil Sheets untuk melihat preview.</p>';
           return;
         }
 
         previewEl.innerHTML = files
-          .map((file, index) => `
+          .map((file) => `
             <article class="overflow-hidden rounded-3xl border border-slate-800/90 bg-slate-900 shadow-xl shadow-slate-950/20">
               <img src="${file.image}" alt="${file.title}" class="h-48 w-full object-cover" />
               <div class="space-y-4 p-6">
@@ -169,8 +147,6 @@
                 <h3 class="text-xl font-semibold text-slate-100">${file.title}</h3>
                 <div class="flex flex-wrap gap-3">
                   <a href="${file.safelinku_url}" target="_blank" class="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500">Lihat Link</a>
-                  <button data-index="${index}" class="edit-btn inline-flex items-center justify-center rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm font-semibold text-slate-100 transition hover:border-indigo-400 hover:text-white">Edit</button>
-                  <button data-index="${index}" class="delete-btn inline-flex items-center justify-center rounded-2xl border border-red-600 bg-red-600/10 px-4 py-3 text-sm font-semibold text-red-300 transition hover:bg-red-600/20">Delete</button>
                 </div>
               </div>
             </article>
@@ -185,104 +161,61 @@
 
       function resetForm() {
         form.reset();
-        editIndexInput.value = '';
-        submitButton.textContent = 'Tambah Konten';
-        cancelEditButton.classList.add('hidden');
-        imagePreview.classList.add('hidden');
-        imagePreview.src = '';
+        submitButton.textContent = 'Simpan Konten dari JS';
       }
 
-      function fillForm(file, index) {
-        document.getElementById('title').value = file.title;
-        document.getElementById('link').value = file.safelinku_url;
-        document.getElementById('category').value = file.category;
-        editIndexInput.value = index;
-        submitButton.textContent = 'Perbarui Konten';
-        cancelEditButton.classList.remove('hidden');
-
-        if (file.image) {
-          imagePreview.src = file.image;
-          imagePreview.classList.remove('hidden');
-        }
+      function saveAdminSheetData(data) {
+        setAdminFiles(data);
+        syncStorage();
+        resetForm();
+        renderPreview();
+        showMessage('Konten JS berhasil disimpan. Refresh landing page untuk melihat hasil.');
       }
 
       function syncStorage() {
         localStorage.setItem(SYNC_KEY, Date.now().toString());
       }
 
-      function saveItem(imageData, title, category, link, editIndex) {
-        const files = getAdminFiles();
-        const item = { title, category, image: imageData, safelinku_url: link };
-
-        if (editIndex !== null) {
-          files[editIndex] = item;
-          showMessage('Konten berhasil diperbarui. Refresh landing page untuk melihat hasil.');
-        } else {
-          files.push(item);
-          showMessage('Konten berhasil disimpan. Refresh landing page untuk melihat hasil.');
+      function handleJSSubmit(content) {
+        const parsed = parseUploadedJS(content);
+        if (!Array.isArray(parsed) || parsed.length === 0) {
+          showMessage('File JS tidak valid. Pastikan ada `window.DATA_SHEET = [...]` di dalamnya.', false);
+          return;
         }
-
-        setAdminFiles(files);
-        syncStorage();
-        resetForm();
-        renderPreview();
+        saveAdminSheetData(parsed);
       }
 
-      form.addEventListener('submit', event => {
+      function readFileContent(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error('Gagal membaca file JS.'));
+          reader.readAsText(file);
+        });
+      }
+
+      form.addEventListener('submit', async event => {
         event.preventDefault();
 
-        const title = document.getElementById('title').value.trim();
-        const link = document.getElementById('link').value.trim();
-        const category = document.getElementById('category').value;
-        const editIndexValue = editIndexInput.value;
-        const editIndex = editIndexValue !== '' ? parseInt(editIndexValue, 10) : null;
-        const currentFiles = getAdminFiles();
-        const existingImage = editIndex !== null ? currentFiles[editIndex]?.image : null;
+        const file = jsFileInput.files[0];
+        const text = jsContentInput.value.trim();
 
-        if (!title || !link || (!existingImage && imageInput.files.length === 0)) {
-          showMessage('Judul, link, dan gambar wajib diisi.', false);
+        if (!file && !text) {
+          showMessage('Upload file JS atau tempel isi JS terlebih dahulu.', false);
           return;
         }
 
-        const doSave = imageData => saveItem(imageData, title, category, link, editIndex);
-
-        if (imageInput.files.length > 0) {
-          readImageFile(imageInput.files[0])
-            .then(doSave)
-            .catch(() => showMessage('Gagal membaca file gambar. Coba lagi.', false));
-        } else {
-          doSave(existingImage);
-        }
-      });
-
-      cancelEditButton.addEventListener('click', () => {
-        resetForm();
-        showMessage('Edit dibatalkan.');
-      });
-
-      previewEl.addEventListener('click', event => {
-        const target = event.target;
-        if (target.matches('.edit-btn')) {
-          const index = parseInt(target.dataset.index, 10);
-          const files = getAdminFiles();
-          if (files[index]) {
-            fillForm(files[index], index);
-            showMessage('Mode edit diaktifkan. Ubah data dan klik Perbarui Konten.');
+        if (file) {
+          try {
+            const content = await readFileContent(file);
+            handleJSSubmit(content);
+          } catch (error) {
+            showMessage(error.message, false);
           }
           return;
         }
 
-        if (target.matches('.delete-btn')) {
-          const index = parseInt(target.dataset.index, 10);
-          const files = getAdminFiles();
-          if (!files[index]) return;
-          if (!confirm(`Hapus konten "${files[index].title}"?`)) return;
-          files.splice(index, 1);
-          setAdminFiles(files);
-          syncStorage();
-          renderPreview();
-          showMessage('Konten berhasil dihapus. Refresh landing page untuk melihat perubahan.');
-        }
+        handleJSSubmit(text);
       });
 
       resetButton.addEventListener('click', () => {
@@ -299,22 +232,6 @@
       logoutButton.addEventListener('click', () => {
         localStorage.removeItem(AUTH_KEY);
         window.location.href = 'login.html';
-      });
-
-      imageInput.addEventListener('change', () => {
-        const file = imageInput.files[0];
-        if (!file) {
-          imagePreview.classList.add('hidden');
-          imagePreview.src = '';
-          return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = () => {
-          imagePreview.src = reader.result;
-          imagePreview.classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
       });
 
       renderPreview();

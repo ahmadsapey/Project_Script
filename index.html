@@ -153,6 +153,7 @@
       </div>
     </footer>
 
+    <script src="sheet-config.js"></script>
     <script>
       const STORAGE_KEY = 'gaskeunfile_cards';
       const OLD_STORAGE_KEY = 'gaskeunfile_admin_cards';
@@ -311,20 +312,88 @@
 
       // Try to load canonical data from `files.json` so different devices see the same content.
       async function initFiles() {
+        // First: try to load an uploaded JS file `data_sheet.js` (admin uploads this file).
+        // The uploaded file should set a global `window.DATA_SHEET = [ ... ]`.
+        async function tryLoadDataSheet() {
+          if (Array.isArray(window.DATA_SHEET) && window.DATA_SHEET.length) return window.DATA_SHEET;
+
+          // Try to inject and load `/data_sheet.js` and wait briefly for it to set the global.
+          return new Promise((resolve) => {
+            let done = false;
+            const timeout = setTimeout(() => {
+              if (!done) {
+                done = true;
+                resolve(null);
+              }
+            }, 1200);
+
+            const s = document.createElement('script');
+            s.src = 'data_sheet.js';
+            s.async = true;
+            s.onload = () => {
+              setTimeout(() => {
+                if (!done) {
+                  done = true;
+                  clearTimeout(timeout);
+                  resolve(Array.isArray(window.DATA_SHEET) ? window.DATA_SHEET : null);
+                }
+              }, 50);
+            };
+            s.onerror = () => {
+              if (!done) {
+                done = true;
+                clearTimeout(timeout);
+                resolve(null);
+              }
+            };
+            document.head.appendChild(s);
+          });
+        }
+
         try {
-          const resp = await fetch('api/files.php', { cache: 'no-store' });
-          if (!resp.ok) throw new Error('no remote file');
-          const remote = await resp.json();
-          if (Array.isArray(remote) && remote.length) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(remote));
-            files = remote;
+          const uploaded = await tryLoadDataSheet();
+          if (Array.isArray(uploaded) && uploaded.length) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(uploaded));
+            files = uploaded;
             renderFiles(currentFilter, currentSearch);
             return;
+          }
+
+          // If user configured a Google Sheets endpoint via `SHEET_ENDPOINT`, try that next.
+          const sheetEndpoint = (typeof SHEET_ENDPOINT !== 'undefined') ? SHEET_ENDPOINT : null;
+          if (sheetEndpoint) {
+            try {
+              const respSheet = await fetch(sheetEndpoint, { cache: 'no-store' });
+              if (respSheet.ok) {
+                const remote = await respSheet.json();
+                if (Array.isArray(remote) && remote.length) {
+                  localStorage.setItem(STORAGE_KEY, JSON.stringify(remote));
+                  files = remote;
+                  renderFiles(currentFilter, currentSearch);
+                  return;
+                }
+              }
+            } catch (err) {
+              // continue to try files.json fallback
+            }
+          }
+
+          // fallback to bundled `files.json`
+          const resp = await fetch('files.json', { cache: 'no-store' });
+          if (resp.ok) {
+            const remote = await resp.json();
+            if (Array.isArray(remote) && remote.length) {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(remote));
+              files = remote;
+              renderFiles(currentFilter, currentSearch);
+              return;
+            }
           }
         } catch (e) {
           // fall back to local storage / defaults
         }
-        // fallback if fetch failed or returned invalid data
+
+        // final fallback if all fetch attempts fail
         files = loadFiles();
         renderFiles(currentFilter, currentSearch);
       }
