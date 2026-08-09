@@ -247,6 +247,18 @@
 
       files = loadFiles();
 
+      function getImageUrl(image) {
+        const fallback = 'https://via.placeholder.com/800x520/0f172a/ffffff?text=No+Image';
+        if (!image) return fallback;
+        if (typeof image === 'string' && image.trim()) return image;
+        if (typeof image === 'object') {
+          if (typeof image.url === 'string' && image.url.trim()) return image.url;
+          if (typeof image.src === 'string' && image.src.trim()) return image.src;
+          if (Array.isArray(image) && image.length && typeof image[0] === 'string') return image[0];
+        }
+        return fallback;
+      }
+
       function renderFiles(filter = 'all', search = '') {
         const filtered = files
           .filter(file => filter === 'all' || file.category === filter)
@@ -260,7 +272,7 @@
           .map(file => `
             <article class="group overflow-hidden rounded-3xl border border-slate-800/90 bg-slate-900 shadow-xl shadow-slate-950/20 transition hover:-translate-y-1 hover:border-indigo-500/40">
               <div class="overflow-hidden">
-                <img src="${file.image}" alt="${file.title}" class="h-52 w-full object-cover transition duration-500 group-hover:scale-105" />
+                <img src="${getImageUrl(file.image)}" alt="${file.title}" class="h-52 w-full object-cover transition duration-500 group-hover:scale-105" />
               </div>
               <div class="space-y-4 p-6">
                 <div class="flex items-center justify-between gap-3">

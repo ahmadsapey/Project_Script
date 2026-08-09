@@ -128,6 +128,18 @@
         }
       }
 
+      function getImageUrl(image) {
+        const fallback = 'https://via.placeholder.com/800x520/0f172a/ffffff?text=No+Image';
+        if (!image) return fallback;
+        if (typeof image === 'string' && image.trim()) return image;
+        if (typeof image === 'object') {
+          if (typeof image.url === 'string' && image.url.trim()) return image.url;
+          if (typeof image.src === 'string' && image.src.trim()) return image.src;
+          if (Array.isArray(image) && image.length && typeof image[0] === 'string') return image[0];
+        }
+        return fallback;
+      }
+
       function renderPreview() {
         const files = getAdminFiles();
         if (files.length === 0) {
@@ -138,7 +150,7 @@
         previewEl.innerHTML = files
           .map((file) => `
             <article class="overflow-hidden rounded-3xl border border-slate-800/90 bg-slate-900 shadow-xl shadow-slate-950/20">
-              <img src="${file.image}" alt="${file.title}" class="h-48 w-full object-cover" />
+              <img src="${getImageUrl(file.image)}" alt="${file.title}" class="h-48 w-full object-cover" />
               <div class="space-y-4 p-6">
                 <div class="flex items-center justify-between gap-3">
                   <span class="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">${file.category}</span>
